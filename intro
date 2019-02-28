@@ -71,7 +71,4 @@ DELETE FROM Varaus WHERE asiakasnimi =  ‘Pehmis Puh’
 DELETE FROM HV WHERE varaus_id =3
 DELETE FROM VL WHERE  varaus_id =3
 
-// List most lucrative customers
 
-SELECT asiakasnimi , SUM(Huone.hinta) AS Varaussumma FROM Varaus JOIN HV ON Varaus.id = Hv.varaus_id
-Join Huone ON Huone.numero = HV.huone_numero GROUP BY Varaus.asiakasnimi ORDER BY SUM(hinta) DESC LIMIT 10 
