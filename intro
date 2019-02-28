@@ -71,4 +71,9 @@ DELETE FROM Varaus WHERE asiakasnimi =  ‘Pehmis Puh’
 DELETE FROM HV WHERE varaus_id =3
 DELETE FROM VL WHERE  varaus_id =3
 
+//List most popular extra items
+
+SELECT nimi AS Lisavarustenimi, COUNT(Vl.varaus_id) AS Varausmäärä FROM lisavarusteet
+LEFT JOIN VL ON VL.lisavarusteet_id = lisavarusteet.id GROUP BY  nimi ORDER BY COUNT(Vl.varaus_id) DESC LIMIT 10
+
 
