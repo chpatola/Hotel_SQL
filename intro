@@ -35,11 +35,13 @@ CREATE INDEX InLisavarusteetNimi ON Lisavarusteet(nimi);
 CREATE INDEX INHuoneTyyppi ON Huone(tyyppi);
 
 //Add rooms
+
 INSERT INTO Huone (tyyppi,numero,hinta) VALUES ('cheap', 111,122);
 INSERT INTO Huone (tyyppi,numero,hinta) VALUES ('cheap', 112122);
 INSERT INTO Huone (tyyppi,numero,hinta) VALUES ('lux', 113,152);
 
 //Add extra items that can be ordered
+
 INSERT INTO Lisavarusteet (nimi) VALUES ('kahvinkeitin');
 INSERT INTO Lisavarusteet (nimi) VALUES ('vauvansänky');
 INSERT INTO Lisavarusteet (nimi) VALUES ('yövalo');
@@ -59,14 +61,17 @@ INSERT INTO HV( varaus_id, huone_numero) VALUES (3,113)
 INSERT INTO VL( varaus_id, lisavarusteet_id  VALUES (3,1)
 
 //List all rooms
+
 .headers on
 SELECT * FROM Huone
 
 // List all reservations and info on the rooms and extra items
+
 SELECT asiakasnimi, numero, tyyppi, hinta ,aloitus, lopetus FROM Varaus
 JOIN HV on varaus.id= hv.varaus_id JOIN Huone ON Huone.numero = HV.huone_numero
 
 // Delete reservation
+
 DELETE FROM Varaus WHERE asiakasnimi =  ‘Pehmis Puh’
 DELETE FROM HV WHERE varaus_id =3
 DELETE FROM VL WHERE  varaus_id =3
@@ -75,5 +80,30 @@ DELETE FROM VL WHERE  varaus_id =3
 
 SELECT nimi AS Lisavarustenimi, COUNT(Vl.varaus_id) AS Varausmäärä FROM lisavarusteet
 LEFT JOIN VL ON VL.lisavarusteet_id = lisavarusteet.id GROUP BY  nimi ORDER BY COUNT(Vl.varaus_id) DESC LIMIT 10
+
+// List available rooms for specific time, type and price
+
+SELECT HUONE.NUMERO,HUONE.TYYPPI,HUONE.HINTA FROM HUONE WHERE HUONE.NUMERO NOT IN (SELECT HUONE.NUMERO FROM HUONE
+JOIN HV ON HUONE.NUMERO=HV.HUONE_NUMERO JOIN VARAUS ON HV.VARAUS_ID =VARAUS.ID WHERE (VARAUS.ALOITUS >= date('2019-03-09')
+AND varaus.lopetus <= date('2019-03-23')) OR (Varaus.lopetus > date('2019-03-09') AND varaus.aloitus <= date('2019-03-23'))) AND huone.hinta <=122
+AND huone.tyyppi ="cheap" order BY Huone.hinta DESC;
+
+//Count number of free rooms for specific time, type and price
+
+SELECT Count (HUONE.NUMERO) FROM HUONE WHERE HUONE.NUMERO NOT IN (SELECT HUONE.NUMERO FROM HUONE
+JOIN HV ON HUONE.NUMERO=HV.HUONE_NUMERO JOIN VARAUS ON HV.VARAUS_ID =VARAUS.ID WHERE (VARAUS.ALOITUS >= date('2019-03-09')
+AND varaus.lopetus <= date('2019-03-23')) OR (Varaus.lopetus > date('2019-03-09') AND varaus.aloitus <= date('2019-03-23')))
+AND huone.hinta <=122 AND huone.tyyppi ="cheap" order BY Huone.hinta DESC;
+
+//List reservations by starting time and all info about them
+
+SELECT asiakasnimi, asiakassposti, aloitus, lopetus, julianday(lopetus)- julianday( aloitus) AS VarauksenKestopv,
+COUNT(Lisavarusteet.nimi) AS Lisavarustamaara, COUNT(Huone.numero) AS Huoneidenmaara FROM Varaus LEFT JOIN
+VL ON VL.varaus_id = varaus.id JOIN Lisavarusteet ON lisavarusteet.id = vl.lisavarusteet_id JOIN HV ON Varaus.id = HV.varaus_id
+JOIN Huone ON huone.numero=hv.huone_numero GROUP BY aloitus ORDER BY aloitus
+
+//Info on specific room(s) for a certain booking
+
+SELECT numero AS Huonenumero, tyyppi, hinta FROM Huone join HV ON Huone.numero =HV.huone_numero  WHERE HV.Varaus_id= 2 ;
 
 
