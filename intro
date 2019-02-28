@@ -1,0 +1,77 @@
+Sqlite3 hotelli.db
+
+//Create tables and indexes
+
+CREATE TABLE Huone(
+tyyppi VARCHAR(20),
+numero NUMERIC(3,0) PRIMARY KEY,
+hinta FLOAT
+);
+CREATE TABLE Lisavarusteet(
+id INTEGER PRIMARY KEY,
+nimi VARCHAR(100)
+);
+CREATE TABLE Varaus(
+id INTEGER PRIMARY KEY,
+aloitus DATE,
+lopetus DATE,
+asiakasnimi VARCHAR(79),
+asiakaspuh INTEGER,
+asiakassposti VARCHAR(100)
+);
+CREATE TABLE VL(
+varaus_id INTEGER,
+lisavarusteet_id INTEGER,
+FOREIGN KEY(varaus_id) REFERENCES Varaus(id),
+FOREIGN KEY(lisavarusteet_id) REFERENCES Lisavarusteet(id)
+);
+CREATE TABLE HV(
+varaus_id INTEGER,
+huone_numero NUMERIC(3,0),
+FOREIGN KEY (varaus_id) REFERENCES Varaus(id),
+FOREIGN KEY(huone_numero) REFERENCES Huone(numero)
+);
+CREATE INDEX InLisavarusteetNimi ON Lisavarusteet(nimi);
+CREATE INDEX INHuoneTyyppi ON Huone(tyyppi);
+
+//Add rooms
+INSERT INTO Huone (tyyppi,numero,hinta) VALUES ('cheap', 111,122);
+INSERT INTO Huone (tyyppi,numero,hinta) VALUES ('cheap', 112122);
+INSERT INTO Huone (tyyppi,numero,hinta) VALUES ('lux', 113,152);
+
+//Add extra items that can be ordered
+INSERT INTO Lisavarusteet (nimi) VALUES ('kahvinkeitin');
+INSERT INTO Lisavarusteet (nimi) VALUES ('vauvansänky');
+INSERT INTO Lisavarusteet (nimi) VALUES ('yövalo');
+
+//Create reservations
+
+INSERT INTO Varaus(aloitus,lopetus,asiakasnimi,asiakaspuh,asiakassposti) VALUES('2019-03-09','2019-03-23','Pehmis Nasse', 030219876,'me@heijd.com')
+INSERT INTO HV( varaus_id, huone_numero) VALUES (1,111)
+INSERT INTO VL( varaus_id, lisavarusteet_id  VALUES (1,2)
+
+INSERT INTO Varaus(aloitus,lopetus,asiakasnimi,asiakaspuh,asiakassposti) VALUES('2019-04-09','2019-04-23','Pehmis Nasse', 030219876,'me@heijd.com')
+INSERT INTO HV( varaus_id, huone_numero) VALUES (2,112)
+INSERT INTO VL( varaus_id, lisavarusteet_id  VALUES (2,2)
+
+INSERT INTO Varaus(aloitus,lopetus,asiakasnimi,asiakaspuh,asiakassposti) VALUES('2019-03-09','2019-03-23','Pehmis Puh', 0302876,'me8@heijd.com')
+INSERT INTO HV( varaus_id, huone_numero) VALUES (3,113)
+INSERT INTO VL( varaus_id, lisavarusteet_id  VALUES (3,1)
+
+//List all rooms
+.headers on
+SELECT * FROM Huone
+
+// List all reservations and info on the rooms and extra items
+SELECT asiakasnimi, numero, tyyppi, hinta ,aloitus, lopetus FROM Varaus
+JOIN HV on varaus.id= hv.varaus_id JOIN Huone ON Huone.numero = HV.huone_numero
+
+// Delete reservation
+DELETE FROM Varaus WHERE asiakasnimi =  ‘Pehmis Puh’
+DELETE FROM HV WHERE varaus_id =3
+DELETE FROM VL WHERE  varaus_id =3
+
+// List most lucrative customers
+
+SELECT asiakasnimi , SUM(Huone.hinta) AS Varaussumma FROM Varaus JOIN HV ON Varaus.id = Hv.varaus_id
+Join Huone ON Huone.numero = HV.huone_numero GROUP BY Varaus.asiakasnimi ORDER BY SUM(hinta) DESC LIMIT 10 
